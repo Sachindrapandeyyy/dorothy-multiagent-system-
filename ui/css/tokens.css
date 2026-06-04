@@ -1,0 +1,234 @@
+/* ============================================================
+   Dorothy OS v2.0 — Design Tokens
+   Military-grade dark theme design system
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ── Core Palette ──────────────────────────────────────── */
+  --color-background:       #0B0F14;
+  --color-surface:          #121821;
+  --color-panel:            #1B2330;
+  --color-panel-elevated:   #222D3D;
+  --color-panel-hover:      #243040;
+
+  /* ── Brand / Accent ────────────────────────────────────── */
+  --color-accent-cyan:      #00C2FF;
+  --color-accent-teal:      #00FFE0;
+  --color-accent-cyan-dim:  rgba(0, 194, 255, 0.35);
+  --color-accent-teal-dim:  rgba(0, 255, 224, 0.25);
+
+  /* ── Semantic ──────────────────────────────────────────── */
+  --color-warning:          #FFB800;
+  --color-error:            #FF3B3B;
+  --color-success:          #00FF88;
+  --color-info:             #00C2FF;
+
+  /* ── Borders ───────────────────────────────────────────── */
+  --border-panel:           rgba(0, 194, 255, 0.15);
+  --border-panel-hover:     rgba(0, 194, 255, 0.35);
+  --border-panel-active:    rgba(0, 194, 255, 0.6);
+  --border-subtle:          rgba(136, 146, 160, 0.12);
+  --border-divider:         rgba(136, 146, 160, 0.08);
+
+  /* ── Text ──────────────────────────────────────────────── */
+  --text-primary:           #E8ECEF;
+  --text-secondary:         #8892A0;
+  --text-muted:             #4A5568;
+  --text-accent:            #00C2FF;
+  --text-inverse:           #0B0F14;
+
+  /* ── Typography ────────────────────────────────────────── */
+  --font-ui:                'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:              'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --font-size-2xs:          0.625rem;   /* 10px */
+  --font-size-xs:           0.6875rem;  /* 11px */
+  --font-size-sm:           0.75rem;    /* 12px */
+  --font-size-md:           0.8125rem;  /* 13px */
+  --font-size-base:         0.875rem;   /* 14px */
+  --font-size-lg:           1rem;       /* 16px */
+  --font-size-xl:           1.125rem;   /* 18px */
+  --font-size-2xl:          1.25rem;    /* 20px */
+  --font-size-3xl:          1.5rem;     /* 24px */
+  --font-size-4xl:          2rem;       /* 32px */
+
+  --font-weight-light:      300;
+  --font-weight-regular:    400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+  --font-weight-bold:       700;
+  --font-weight-extrabold:  800;
+
+  --line-height-tight:      1.2;
+  --line-height-normal:     1.5;
+  --line-height-relaxed:    1.7;
+
+  --letter-spacing-tight:   -0.02em;
+  --letter-spacing-normal:  0;
+  --letter-spacing-wide:    0.02em;
+  --letter-spacing-wider:   0.05em;
+  --letter-spacing-widest:  0.1em;
+
+  /* ── Spacing ───────────────────────────────────────────── */
+  --space-2xs:  2px;
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   12px;
+  --space-base: 16px;
+  --space-lg:   20px;
+  --space-xl:   24px;
+  --space-2xl:  32px;
+  --space-3xl:  40px;
+  --space-4xl:  48px;
+  --space-5xl:  64px;
+
+  /* ── Radii ─────────────────────────────────────────────── */
+  --radius-xs:    2px;
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    12px;
+  --radius-xl:    16px;
+  --radius-2xl:   20px;
+  --radius-full:  9999px;
+
+  /* ── Shadows & Glows ───────────────────────────────────── */
+  --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg:          0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-xl:          0 16px 48px rgba(0, 0, 0, 0.7);
+  --glow-cyan:          0 0 20px rgba(0, 194, 255, 0.15), 0 0 40px rgba(0, 194, 255, 0.05);
+  --glow-cyan-strong:   0 0 20px rgba(0, 194, 255, 0.3), 0 0 60px rgba(0, 194, 255, 0.1);
+  --glow-teal:          0 0 20px rgba(0, 255, 224, 0.15), 0 0 40px rgba(0, 255, 224, 0.05);
+  --glow-warning:       0 0 20px rgba(255, 184, 0, 0.2);
+  --glow-error:         0 0 20px rgba(255, 59, 59, 0.2);
+  --glow-success:       0 0 20px rgba(0, 255, 136, 0.2);
+  --glow-inset-cyan:    inset 0 0 30px rgba(0, 194, 255, 0.03);
+
+  /* ── Glassmorphism ─────────────────────────────────────── */
+  --glass-bg:           rgba(18, 24, 33, 0.85);
+  --glass-bg-light:     rgba(27, 35, 48, 0.75);
+  --glass-bg-heavy:     rgba(11, 15, 20, 0.92);
+  --glass-blur:         blur(12px);
+  --glass-blur-heavy:   blur(20px);
+
+  /* ── Transitions ───────────────────────────────────────── */
+  --ease-default:       cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in:            cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:           cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast:      150ms;
+  --duration-normal:    300ms;
+  --duration-slow:      500ms;
+  --duration-slower:    800ms;
+
+  /* ── Z-Index Scale ─────────────────────────────────────── */
+  --z-base:       1;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-overlay:    300;
+  --z-modal:      400;
+  --z-toast:      500;
+  --z-topbar:     600;
+
+  /* ── Layout Dimensions ─────────────────────────────────── */
+  --topbar-height:      48px;
+  --sidebar-width:      260px;
+  --sidebar-collapsed:  64px;
+  --scrollbar-width:    6px;
+}
+
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.6); opacity: 0.5; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 194, 255, 0.2); }
+  50%      { box-shadow: 0 0 20px rgba(0, 194, 255, 0.5), 0 0 40px rgba(0, 194, 255, 0.15); }
+}
+
+@keyframes glowBorder {
+  0%, 100% { border-color: rgba(0, 194, 255, 0.2); }
+  50%      { border-color: rgba(0, 194, 255, 0.6); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.05); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes barFill {
+  from { width: 0%; }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%           { transform: translateY(-6px); }
+}

@@ -1,0 +1,46 @@
+# Dorothy OS v2.0 — Python Dependencies
+
+# Core Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+websockets>=15.0
+pydantic>=2.0.0
+
+# LLM Integration
+ollama>=0.4.0
+httpx>=0.27.0
+
+# System Monitoring
+psutil>=7.0.0
+
+# Text-to-Speech
+pyttsx3>=2.98
+edge-tts>=6.1.0
+SpeechRecognition>=3.10.0
+
+# Voice — Fast Local STT (faster-whisper = CTranslate2 Whisper, 10x faster)
+faster-whisper>=1.0.0
+numpy>=1.24.0
+
+# Audio Control (Windows)
+pycaw>=20240210
+comtypes>=1.4.0
+
+# Vision / Object Detection
+ultralytics>=8.2.0
+opencv-python>=4.9.0
+Pillow>=11.0.0
+
+# Desktop Automation
+pyautogui>=0.9.54
+
+# Memory
+# chromadb>=0.5.0  # Optional: enable for vector memory
+
+# Utilities
+aiofiles>=24.0.0
+
+# LangGraph Multi-Agent Orchestration
+langgraph>=0.1.0
+langchain-core>=0.2.0
+

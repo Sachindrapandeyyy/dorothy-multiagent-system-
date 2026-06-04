@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dorothy OS v2.0 — AI Operating System Command Center">
+  <meta name="theme-color" content="#0B0F14">
+  <title>Dorothy OS v2.0 — Command Center</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design System -->
+  <link rel="stylesheet" href="/ui/css/tokens.css">
+  <link rel="stylesheet" href="/ui/css/layout.css">
+  <link rel="stylesheet" href="/ui/css/components.css">
+  <link rel="stylesheet" href="/ui/css/hud.css">
+
+  <style>
+    /* ── Voice Orb ─────────────────────────────────── */
+    .voice-orb-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0 8px;
+    }
+    .voice-orb {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.3s ease;
+      background: radial-gradient(circle at 35% 35%, #1a2a3a, #0b0f14);
+      border: 2px solid rgba(0,194,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .voice-orb::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,194,255,0.15);
+      animation: orb-pulse-idle 3s ease-in-out infinite;
+    }
+    .voice-orb::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,194,255,0.07);
+      animation: orb-pulse-idle 3s ease-in-out infinite 0.8s;
+    }
+    @keyframes orb-pulse-idle {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50%       { opacity: 0.9; transform: scale(1.06); }
+    }
+    /* Recording state */
+    .voice-orb.orb-recording {
+      background: radial-gradient(circle at 35% 35%, #3a1a1a, #1a0a0a);
+      border-color: rgba(255,50,50,0.8);
+      box-shadow: 0 0 24px rgba(255,50,50,0.6), 0 0 48px rgba(255,50,50,0.2);
+      transform: scale(1.08);
+      animation: orb-record-pulse 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes orb-record-pulse {
+      from { box-shadow: 0 0 20px rgba(255,50,50,0.5); }
+      to   { box-shadow: 0 0 40px rgba(255,50,50,0.9), 0 0 80px rgba(255,50,50,0.3); }
+    }
+    /* Processing state */
+    .voice-orb.orb-processing {
+      border-color: rgba(255,184,0,0.8);
+      box-shadow: 0 0 24px rgba(255,184,0,0.5);
+      animation: orb-spin 1s linear infinite;
+    }
+    @keyframes orb-spin {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(360deg); }
+    }
+    /* Speaking state */
+    .voice-orb.orb-speaking {
+      border-color: rgba(0,255,136,0.8);
+      box-shadow: 0 0 24px rgba(0,255,136,0.5), 0 0 48px rgba(0,255,136,0.2);
+      animation: orb-speak-pulse 0.4s ease-in-out infinite alternate;
+    }
+    @keyframes orb-speak-pulse {
+      from { transform: scale(1.0); box-shadow: 0 0 16px rgba(0,255,136,0.4); }
+      to   { transform: scale(1.1); box-shadow: 0 0 36px rgba(0,255,136,0.8); }
+    }
+    /* Hold label */
+    #voice-orb-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+    /* Waveform canvas */
+    #voice-wave-canvas {
+      width: 100%;
+      height: 44px;
+      display: block;
+      border-radius: 6px;
+      background: rgba(0,194,255,0.03);
+    }
+    /* Live transcript */
+    #voice-transcript-live {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-accent-cyan);
+      text-align: center;
+      min-height: 16px;
+      transition: opacity 0.4s ease;
+      opacity: 0;
+      padding: 0 8px;
+      word-break: break-word;
+    }
+    /* Mode toggle */
+    #btn-voice-mode-toggle {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,194,255,0.3);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: all 0.2s;
+    }
+    #btn-voice-mode-toggle.active {
+      border-color: rgba(255,50,50,0.7);
+      color: #ff5555;
+      background: rgba(255,50,50,0.08);
+    }
+    #btn-voice-mode-toggle:hover { opacity: 0.85; }
+    /* Wave ring state classes */
+    .audio-waveform-ring.voice-state-recording .wave-bar { animation-play-state: running; background: #ff4444; }
+    .audio-waveform-ring.voice-state-speaking  .wave-bar { animation-play-state: running; background: #00ff88; }
+    .audio-waveform-ring.voice-state-idle      .wave-bar { animation-play-state: paused; }
+
+    /* ── Agent Dashboard ──────────────────────────────── */
+    .full-page-grid { display:flex; flex-direction:column; gap:16px; padding:16px; height:100%; overflow-y:auto; }
+    .agent-full-card { background:rgba(0,194,255,0.04); border:1px solid rgba(0,194,255,0.15); border-radius:12px; padding:20px; }
+    .head-card { border-color:rgba(0,194,255,0.4); background:rgba(0,194,255,0.07); }
+    .agent-full-header { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .agent-full-icon { font-size:36px; }
+    .agent-full-name { font-size:18px; font-weight:700; color:#fff; }
+    .agent-badge-general { background:#00c2ff; color:#000; font-size:9px; font-weight:800; padding:2px 7px; border-radius:8px; margin-left:8px; vertical-align:middle; }
+    .agent-full-role { font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-top:3px; }
+    .agent-live-dot { width:10px; height:10px; border-radius:50%; background:#00ff88; margin-left:auto; box-shadow:0 0 8px #00ff88; animation:orb-pulse-idle 2s infinite; }
+    .agent-full-stats { display:flex; gap:24px; margin-bottom:12px; }
+    .agent-stat-block { text-align:center; }
+    .agent-stat-val { font-size:24px; font-weight:700; color:#00c2ff; font-family:var(--font-mono); }
+    .agent-stat-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; }
+    .agent-full-desc { font-size:12px; color:var(--text-secondary); line-height:1.6; }
+    .employee-agents-section { flex:1; }
+    .section-label { font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:0.1em; margin-bottom:10px; }
+    .employee-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; }
+    .emp-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px 10px; text-align:center; transition:all 0.2s; }
+    .emp-card.emp-active { border-color:rgba(0,194,255,0.5); background:rgba(0,194,255,0.08); box-shadow:0 0 12px rgba(0,194,255,0.15); }
+    .emp-icon { font-size:22px; margin-bottom:6px; }
+    .emp-name { font-size:11px; font-weight:600; color:#fff; }
+    .emp-role { font-size:9px; color:var(--text-muted); font-family:var(--font-mono); margin-top:2px; }
+    .emp-status { font-size:9px; font-weight:700; font-family:var(--font-mono); margin-top:6px; padding:2px 6px; border-radius:6px; }
+    .emp-status.idle    { color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04); }
+    .emp-status.working { color:#ffb800; background:rgba(255,184,0,0.1); animation:orb-pulse-idle 0.8s infinite; }
+    .emp-status.thinking{ color:#00c2ff; background:rgba(0,194,255,0.1); }
+    .task-log-panel { background:rgba(0,0,0,0.2); border:1px solid rgba(0,194,255,0.1); border-radius:10px; padding:14px; }
+    .task-log-feed { max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
+    .task-log-row { font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); display:flex; gap:10px; }
+    .task-log-row.muted { color:var(--text-muted); }
+    .tlog-time { color:rgba(0,194,255,0.5); flex-shrink:0; }
+    .tlog-msg { word-break:break-word; }
+
+    /* ── Memory Center ─────────────────────────────────── */
+    .memory-page-layout { display:flex; flex-direction:column; gap:16px; padding:16px; height:100%; overflow-y:auto; }
+    .memory-search-bar { display:flex; gap:10px; }
+    .memory-search-field { flex:1; background:rgba(0,194,255,0.05); border:1px solid rgba(0,194,255,0.2); border-radius:8px; padding:10px 14px; color:#fff; font-size:13px; outline:none; }
+    .memory-search-field:focus { border-color:rgba(0,194,255,0.5); }
+    .memory-search-submit { background:rgba(0,194,255,0.15); border:1px solid rgba(0,194,255,0.3); color:#00c2ff; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight:600; transition:all 0.2s; }
+    .memory-search-submit:hover { background:rgba(0,194,255,0.25); }
+    .memory-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .mem-stat-card { background:rgba(0,194,255,0.04); border:1px solid rgba(0,194,255,0.12); border-radius:10px; padding:14px; text-align:center; }
+    .mem-stat-num { font-size:22px; font-weight:700; color:#00c2ff; font-family:var(--font-mono); }
+    .mem-stat-label { font-size:10px; color:var(--text-muted); margin-top:4px; }
+    .memory-results-panel { flex:1; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
+    .memory-result-placeholder { color:var(--text-muted); font-size:13px; text-align:center; padding:40px; }
+    .memory-result-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:14px; }
+    .mem-res-role { font-size:9px; font-weight:700; font-family:var(--font-mono); margin-bottom:6px; display:inline-block; padding:2px 7px; border-radius:4px; }
+    .mem-res-role.user      { background:rgba(0,194,255,0.15); color:#00c2ff; }
+    .mem-res-role.assistant { background:rgba(0,255,136,0.12); color:#00ff88; }
+    .mem-res-text { font-size:13px; color:#fff; margin-bottom:6px; line-height:1.5; }
+    .mem-res-meta { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); }
+
+    /* ── System Monitor ────────────────────────────────── */
+    .sysmon-layout { display:flex; flex-direction:column; gap:16px; padding:16px; height:100%; overflow-y:auto; }
+    .sysmon-vitals-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .sysmon-vital-card { background:rgba(0,194,255,0.04); border:1px solid rgba(0,194,255,0.12); border-radius:10px; padding:14px 12px; }
+    .sysmon-vital-label { font-family:var(--font-mono); font-size:9px; color:var(--text-muted); letter-spacing:0.1em; margin-bottom:8px; }
+    .sysmon-bar-wrap { background:rgba(255,255,255,0.06); border-radius:4px; height:6px; margin-bottom:8px; overflow:hidden; }
+    .sysmon-bar { height:100%; border-radius:4px; transition:width 1s ease; width:0%; }
+    .sysmon-vital-val { font-size:18px; font-weight:700; color:#fff; font-family:var(--font-mono); }
+    .sysmon-procs-panel { background:rgba(0,0,0,0.2); border:1px solid rgba(0,194,255,0.1); border-radius:10px; padding:14px; flex:1; }
+    .sysmon-procs-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); }
+    .sysmon-refresh-btn { background:rgba(0,194,255,0.1); border:1px solid rgba(0,194,255,0.2); color:#00c2ff; padding:4px 12px; border-radius:6px; cursor:pointer; font-size:11px; }
+    .sysmon-procs-table-wrap { overflow-y:auto; max-height:280px; }
+    .sysmon-table { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:11px; }
+    .sysmon-table th { color:var(--text-muted); padding:6px 8px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.06); font-weight:600; position:sticky; top:0; background:#0b0f14; }
+    .sysmon-table td { padding:6px 8px; color:var(--text-secondary); border-bottom:1px solid rgba(255,255,255,0.04); }
+    .sysmon-table tr:hover td { background:rgba(0,194,255,0.04); }
+    .smon-proc-name { color:#fff; font-weight:500; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .smon-loading { text-align:center; color:var(--text-muted); padding:20px; }
+    .smon-kill-btn { background:rgba(255,50,50,0.1); border:1px solid rgba(255,50,50,0.3); color:#ff5555; padding:2px 8px; border-radius:4px; cursor:pointer; font-size:10px; }
+    .smon-kill-btn:hover { background:rgba(255,50,50,0.2); }
+    .sysmon-net-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .sysmon-net-card { background:rgba(0,194,255,0.04); border:1px solid rgba(0,194,255,0.1); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:4px; }
+    .smon-net-label { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); }
+    .smon-net-val { font-size:16px; font-weight:700; color:#00c2ff; font-family:var(--font-mono); }
+
+    /* ── Security Center ───────────────────────────────── */
+    .security-layout { display:flex; flex-direction:column; gap:16px; padding:16px; height:100%; overflow-y:auto; }
+    .sec-biometric-card { background:linear-gradient(135deg,rgba(0,194,255,0.08),rgba(0,255,136,0.04)); border:1px solid rgba(0,194,255,0.25); border-radius:14px; padding:24px; text-align:center; }
+    .sec-bio-icon { font-size:48px; margin-bottom:10px; }
+    .sec-bio-title { font-size:18px; font-weight:700; color:#fff; }
+    .sec-bio-status { font-family:var(--font-mono); font-size:13px; color:#00ff88; margin:8px 0 16px; }
+    .sec-challenge-btn { background:rgba(0,194,255,0.15); border:1px solid rgba(0,194,255,0.4); color:#00c2ff; padding:10px 24px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:all 0.2s; }
+    .sec-challenge-btn:hover { background:rgba(0,194,255,0.25); }
+    .sec-audit-panel { background:rgba(0,0,0,0.2); border:1px solid rgba(0,194,255,0.1); border-radius:10px; padding:16px; }
+    .sec-panel-title { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-bottom:12px; }
+    .sec-audit-feed { display:flex; flex-direction:column; gap:4px; max-height:200px; overflow-y:auto; }
+    .sec-audit-row { display:flex; gap:12px; align-items:center; font-family:var(--font-mono); font-size:10px; }
+    .sec-audit-time { color:rgba(0,194,255,0.5); flex-shrink:0; }
+    .sec-audit-action { flex:1; color:var(--text-secondary); }
+    .sec-audit-tag { padding:1px 6px; border-radius:4px; font-weight:700; }
+    .sec-audit-tag.ok   { background:rgba(0,255,136,0.12); color:#00ff88; }
+    .sec-audit-tag.fail { background:rgba(255,50,50,0.12);  color:#ff4444; }
+    .sec-keys-panel { background:rgba(0,0,0,0.15); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; }
+    .sec-key-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .sec-key-row:last-child { border-bottom:none; }
+    .sec-key-name { font-size:13px; color:#fff; }
+    .sec-key-status { font-family:var(--font-mono); font-size:11px; }
+
+    /* ── Settings ──────────────────────────────────────── */
+    .settings-layout { display:flex; flex-direction:column; gap:16px; padding:16px; height:100%; overflow-y:auto; }
+    .settings-section { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:20px; }
+    .settings-section-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:16px; }
+    .settings-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .settings-label { font-size:12px; color:var(--text-secondary); }
+    .settings-select { background:rgba(0,194,255,0.07); border:1px solid rgba(0,194,255,0.2); border-radius:7px; color:#fff; padding:7px 12px; font-size:12px; outline:none; min-width:180px; }
+    .settings-input  { background:rgba(0,194,255,0.05); border:1px solid rgba(0,194,255,0.15); border-radius:7px; color:#fff; padding:7px 12px; font-size:12px; outline:none; min-width:180px; font-family:var(--font-mono); }
+    .settings-apply-btn { background:rgba(0,194,255,0.15); border:1px solid rgba(0,194,255,0.3); color:#00c2ff; padding:9px 20px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600; margin-top:4px; transition:all 0.2s; }
+    .settings-apply-btn:hover { background:rgba(0,194,255,0.25); }
+    .settings-conn-result { font-family:var(--font-mono); font-size:11px; color:#00ff88; margin-top:8px; }
+    .settings-color-row { display:flex; gap:10px; }
+    .color-swatch { width:28px; height:28px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.2s; }
+    .color-swatch.active { border-color:#fff; transform:scale(1.15); }
+    .color-swatch:hover  { transform:scale(1.1); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       APP SHELL
+       ═══════════════════════════════════════════════════════ -->
+  <div id="app-shell">
+
+    <!-- ─── TOP BAR ──────────────────────────────────────── -->
+    <header id="top-bar">
+      <div class="topbar-left">
+        <button id="btn-sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+        <div id="logo">
+          <div id="logo-icon">J</div>
+          <span id="logo-text">Dorothy OS</span>
+          <span id="logo-version">v2.0</span>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div id="system-clock">
+          <span class="clock-time">--</span><span class="clock-separator">:</span><span class="clock-time">--</span><span class="clock-separator">:</span><span class="clock-time">--</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="status-indicators">
+          <div class="status-indicator tooltip" data-tooltip="Ollama Local LLM" id="indicator-ollama">
+            <span class="status-dot offline" id="dot-ollama"></span>
+            <span class="status-label">Ollama</span>
+          </div>
+          <div class="status-indicator tooltip" data-tooltip="Cloud API" id="indicator-cloud">
+            <span class="status-dot offline" id="dot-cloud"></span>
+            <span class="status-label">Cloud</span>
+          </div>
+          <div class="status-indicator tooltip" data-tooltip="OpenClaw Agent Framework" id="indicator-openclaw">
+            <span class="status-dot offline" id="dot-openclaw"></span>
+            <span class="status-label">OpenClaw</span>
+          </div>
+        </div>
+
+        <div class="window-controls">
+          <button class="window-btn" id="btn-window-minimize" aria-label="Minimize">─</button>
+          <button class="window-btn" id="btn-window-maximize" aria-label="Maximize">□</button>
+          <button class="window-btn" id="btn-window-close" aria-label="Close">✕</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── SIDEBAR ──────────────────────────────────────── -->
+    <aside id="sidebar">
+      <nav id="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <div class="nav-item active" data-page="command-center" id="nav-command-center">
+            <span class="nav-icon">⌘</span>
+            <span class="nav-label">Command Center</span>
+          </div>
+          <div class="nav-item" data-page="agent-dashboard" id="nav-agent-dashboard">
+            <span class="nav-icon">🤖</span>
+            <span class="nav-label">Agent Dashboard</span>
+          </div>
+          <div class="nav-item" data-page="memory-center" id="nav-memory-center">
+            <span class="nav-icon">🧠</span>
+            <span class="nav-label">Memory Center</span>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <div class="nav-item" data-page="system-monitor" id="nav-system-monitor">
+            <span class="nav-icon">⚙</span>
+            <span class="nav-label">System Monitor</span>
+          </div>
+          <div class="nav-item" data-page="security-center" id="nav-security-center">
+            <span class="nav-icon">🛡️</span>
+            <span class="nav-label">Security Center</span>
+          </div>
+          <div class="nav-item" data-page="settings" id="nav-settings">
+            <span class="nav-icon">⚙</span>
+            <span class="nav-label">Settings</span>
+            <span class="nav-badge">NEW</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-text" style="font-size: var(--font-size-xs); color: var(--text-muted); font-family: var(--font-mono);">
+          Build 2025.06.01<br>
+          Kernel: Quantum-3
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN CONTENT ─────────────────────────────────── -->
+    <main id="main-content">
+
+      <!-- ═══ COMMAND CENTER PAGE ═══ -->
+      <div class="page-view active" id="page-command-center">
+
+        <!-- ─── COLUMN 1: SYSTEM & SECURITY ─── -->
+        <div class="hud-col">
+          <!-- LLM Gateway -->
+          <div class="panel-hud">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>⬡</span> System & Security</div>
+              <div class="badge badge-cyan">SECURE</div>
+            </div>
+            <div class="panel-hud-body">
+              <div class="llm-gateway-container">
+                <div class="llm-label">LLM Gateway Selector:</div>
+                <div class="llm-selector-list" id="llm-selectors">
+                  <div class="llm-selector-item active" id="llm-claude" data-model="claude">
+                    <span><span class="llm-indicator">◈</span> Claude-Active</span>
+                    <span style="color:#00c2ff;">[C]</span>
+                  </div>
+                  <div class="llm-selector-item" id="llm-gemini" data-model="gemini">
+                    <span><span class="llm-indicator">◇</span> Gemini-Cloud</span>
+                    <span style="color:#ffb800;">[G]</span>
+                  </div>
+                  <div class="llm-selector-item" id="llm-ollama" data-model="ollama">
+                    <span><span class="llm-indicator">◇</span> Ollama-Local</span>
+                    <span style="color:rgba(255,255,255,0.7);">[O]</span>
+                  </div>
+                  <div class="llm-selector-item" id="llm-auto" data-model="auto">
+                    <span><span class="llm-indicator">◇</span> Auto-Cascade</span>
+                    <span style="color:#00ff88;">[A]</span>
+                  </div>
+                </div>
+                <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                  <div class="llm-slider-track"><div class="llm-slider-fill claude"></div></div>
+                  <div class="llm-slider-track"><div class="llm-slider-fill gemini"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RAG Memory & Audit Ledger -->
+          <div class="panel-hud" style="flex: 1;">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>🧠</span> RAG Memory & Ledger</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+              <div class="rag-audit-split">
+                <!-- RAG memory amber cylinder -->
+                <div class="rag-memory-widget">
+                  <div class="cylinder-db">
+                    <div class="cylinder-ring top"></div>
+                    <div class="cylinder-ring mid"></div>
+                    <div class="cylinder-ring bot"></div>
+                  </div>
+                  <div class="rag-db-label">pules amber</div>
+                </div>
+                <!-- Audit Ledger chain -->
+                <div class="audit-ledger-console">
+                  <div class="audit-ledger-row"><span>10:03:57 SYSMON_READ</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:03:57 VECTOR_INDEX</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:03:57 LEDGER_INIT</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:03:58 WS_HANDSHAKE</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:04:02 BIO_SHIELD</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:04:02 AUDIT_LEDGER</span> <span class="audit-tag-valid">VALID</span></div>
+                  <div class="audit-ledger-row"><span>10:04:15 SYSMON_READ</span> <span class="audit-tag-valid">VALID</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Biometric Shield -->
+          <div class="panel-hud">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>🛡️</span> Biometric Shield</div>
+              <span class="icon" style="color: var(--color-accent-cyan); font-size: 10px;">🔒</span>
+            </div>
+            <div class="panel-hud-body">
+              <div class="bio-shield-wrapper" id="bio-shield-trigger">
+                <span class="bio-icon-glow" id="bio-icon">🔒</span>
+                <div class="bio-status-block">
+                  <span class="bio-title-active" id="bio-status-label">ACTIVE</span>
+                  <span class="bio-desc" id="bio-status-desc" style="color: #00ff88; font-family: var(--font-mono); font-size: 10px;">WIN_HELLO: GRANTED</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- System Vitals Circles -->
+          <div class="panel-hud">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>◈</span> System Vitals</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm) var(--space-xs);">
+              <div class="radial-vitals-row">
+                <!-- CPU -->
+                <div class="radial-gauge-container">
+                  <svg class="svg-gauge" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40" />
+                    <circle class="fill" id="circle-cpu" cx="50" cy="50" r="40" style="stroke: #00c2ff;" />
+                  </svg>
+                  <span class="gauge-inner-val" id="val-cpu">0%</span>
+                  <span class="gauge-label">CPU</span>
+                </div>
+                <!-- RAM -->
+                <div class="radial-gauge-container">
+                  <svg class="svg-gauge" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40" />
+                    <circle class="fill" id="circle-ram" cx="50" cy="50" r="40" style="stroke: #00ff88;" />
+                  </svg>
+                  <span class="gauge-inner-val" id="val-ram">0%</span>
+                  <span class="gauge-label">RAM</span>
+                </div>
+                <!-- GPU -->
+                <div class="radial-gauge-container">
+                  <svg class="svg-gauge" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40" />
+                    <circle class="fill" id="circle-gpu" cx="50" cy="50" r="40" style="stroke: #ffb800;" />
+                  </svg>
+                  <span class="gauge-inner-val" id="val-gpu">0%</span>
+                  <span class="gauge-label">GPU</span>
+                </div>
+                <!-- Disk -->
+                <div class="radial-gauge-container">
+                  <svg class="svg-gauge" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40" />
+                    <circle class="fill" id="circle-disk" cx="50" cy="50" r="40" style="stroke: #00c2ff;" />
+                  </svg>
+                  <span class="gauge-inner-val" id="val-disk">0%</span>
+                  <span class="gauge-label">DISK</span>
+                </div>
+                <!-- Battery -->
+                <div class="radial-gauge-container">
+                  <svg class="svg-gauge" viewBox="0 0 100 100">
+                    <circle class="bg" cx="50" cy="50" r="40" />
+                    <circle class="fill" id="circle-battery" cx="50" cy="50" r="40" style="stroke: #00ff88;" />
+                  </svg>
+                  <span class="gauge-inner-val" id="val-battery">0%</span>
+                  <span class="gauge-label">BATT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── COLUMN 2: CENTER AUDIO CORE ─── -->
+        <div class="hud-col">
+          <!-- Voice Orb + WebRTC Pipeline -->
+          <div class="panel-hud">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>🎙️</span> Voice Pipeline</div>
+              <div class="badge badge-cyan" id="voice-ws-badge">CONNECTING</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+
+              <!-- Central orb + waveform -->
+              <div class="voice-orb-wrap">
+
+                <!-- Mic Orb (push to talk) -->
+                <div id="voice-orb" class="voice-orb orb-idle" id="btn-voice-orb"
+                     title="Hold to speak / release to send">
+                  🎤
+                </div>
+                <div id="voice-orb-status">🎙️ Hold to speak</div>
+
+                <!-- Waveform canvas -->
+                <canvas id="voice-wave-canvas" width="220" height="44"></canvas>
+
+                <!-- Live transcript echo -->
+                <div id="voice-transcript-live"></div>
+
+                <!-- Mode toggle -->
+                <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                  <button id="btn-voice-mode-toggle">⚪ HOLD</button>
+                  <span style="font-size:9px; color:var(--text-muted); font-family:var(--font-mono);">mode</span>
+                </div>
+
+                <!-- Legacy wave ring (kept for CSS compat) -->
+                <div style="display:none;">
+                  <div class="audio-waveform-ring" id="legacy-wave-ring">
+                    <div class="wave-bar"></div><div class="wave-bar"></div>
+                    <div class="wave-bar"></div><div class="wave-bar"></div>
+                    <div class="wave-bar"></div><div class="wave-bar"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Transcript panel -->
+          <div class="panel-hud chat-hud-panel">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>◉</span> Conversation Transcript</div>
+              <div class="badge badge-cyan">LIVE</div>
+            </div>
+            <div id="chat-messages-hud">
+              <!-- Mirror of main chat messages for widescreen visibility -->
+            </div>
+            <!-- Message Input row -->
+            <div id="chat-input-bar" style="margin: 0; padding: var(--space-sm); border-top: 1px solid rgba(0, 194, 255, 0.12);">
+              <div id="chat-input-wrapper">
+                <textarea id="chat-input" rows="1" placeholder="Type a message..." aria-label="Chat input"></textarea>
+              </div>
+              <button id="btn-send" aria-label="Send message">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── COLUMN 3: AGENT ORCHESTRATION & TERMINAL ─── -->
+        <div class="hud-col">
+          <!-- Compiled LangGraph diagram -->
+          <div class="panel-hud langgraph-net-panel" style="flex: 1;">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>⬡</span> Agent Orchestration & Execution</div>
+              <div class="badge badge-cyan">LangGraph</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+              <div class="langgraph-canvas-container" id="langgraph-flowchart">
+                <svg class="graph-svg-connections">
+                  <!-- Connection lines linking supervisor and nodes -->
+                  <line class="graph-svg-line" x1="195" y1="40" x2="60" y2="105" />
+                  <line class="graph-svg-line" x1="195" y1="40" x2="195" y2="105" />
+                  <line class="graph-svg-line" x1="195" y1="40" x2="330" y2="105" />
+                  
+                  <line class="graph-svg-line" x1="60" y1="105" x2="60" y2="165" />
+                  <line class="graph-svg-line" x1="195" y1="105" x2="195" y2="165" />
+                  <line class="graph-svg-line" x1="330" y1="105" x2="330" y2="165" />
+                  
+                  <line class="graph-svg-line" x1="60" y1="165" x2="120" y2="220" />
+                  <line class="graph-svg-line" x1="195" y1="165" x2="270" y2="220" />
+                  <line class="graph-svg-line" x1="330" y1="165" x2="120" y2="275" />
+                  <line class="graph-svg-line" x1="330" y1="165" x2="270" y2="275" />
+                </svg>
+
+                <!-- Agent Graph Nodes -->
+                <div class="graph-node head-node" id="graph-node-lead" style="top: 40px; left: 50%;">
+                  Head Agent
+                  <div class="node-subtext">Supervisor active</div>
+                </div>
+                
+                <div class="graph-node" id="graph-node-file" style="top: 105px; left: 16%;">
+                  File Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-system" style="top: 105px; left: 50%;">
+                  System Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-desktop" style="top: 105px; left: 84%;">
+                  Desktop Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                
+                <div class="graph-node" id="graph-node-browser" style="top: 165px; left: 16%;">
+                  Browser Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-research" style="top: 165px; left: 50%;">
+                  Research Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-voice" style="top: 165px; left: 84%;">
+                  Voice Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                
+                <div class="graph-node" id="graph-node-vision" style="top: 220px; left: 32%;">
+                  Vision Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-backend" style="top: 220px; left: 68%;">
+                  Backend Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                
+                <div class="graph-node" id="graph-node-security" style="top: 275px; left: 32%;">
+                  Security Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+                <div class="graph-node" id="graph-node-windows" style="top: 275px; left: 68%;">
+                  Windows Agent
+                  <div class="node-subtext">IDLE</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sandbox Terminal panel -->
+          <div class="panel-hud sandbox-hud-panel">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>❯</span> Sandbox Terminal</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+              <div class="sandbox-console">
+                <div class="sandbox-feed" id="sandbox-console-feed">
+                  <div class="sandbox-line header">sandbox initialized... resource timeout=5.0s</div>
+                  <div class="sandbox-line">running <span style="color: #00ff88;">optimization_check.py</span>...</div>
+                  <div class="sandbox-line success">[Memory cleared, Vitals stable]</div>
+                  <div class="sandbox-line" style="color: var(--text-muted);">Type Python code below to execute inside the sandbox...</div>
+                </div>
+                <div class="sandbox-input-line">
+                  <span class="sandbox-prompt">&gt;</span>
+                  <input type="text" class="sandbox-input" id="sandbox-term-input" placeholder="print('Hello from sandbox!')" aria-label="Sandbox console input">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ─── COLUMN 4: AGENT CARD GRID & SCREEN SNAPSHOT ─── -->
+        <div class="hud-col">
+          <!-- Agent buttons grid -->
+          <div class="panel-hud">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>⬡</span> Agent Status</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+              <div class="hud-agent-grid" id="agent-grid">
+                <!-- Status buttons render dynamically here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen Perception view snapshot -->
+          <div class="panel-hud hud-vision-panel">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>👁️</span> Screen Perception</div>
+            </div>
+            <div class="panel-hud-body" style="padding: 0 var(--space-sm) var(--space-sm) var(--space-sm);">
+              <div class="hud-snapshot-container">
+                <img class="hud-snapshot-img" id="hud-perception-snapshot" src="/captures/vlm_perception.png" onerror="this.style.display='none'; this.parentElement.style.background='rgba(0,194,255,0.03)';" alt="Vision snapshot">
+                <div class="hud-snapshot-overlay"></div>
+                <div class="hud-snapshot-scanline"></div>
+                <div class="hud-snapshot-label">OpenCV Click Matcher</div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 8px; color: var(--text-muted); margin-top: 4px; text-align: center;">
+                Perception status: <span style="color: var(--color-accent-cyan);">ACTIVE (1200x350)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Green mic button -->
+          <div class="hud-voice-panel">
+            <div class="btn-voice-hud" id="btn-voice-toggle">
+              <span class="hud-mic-icon-pulse"></span>
+              Voice Interface
+            </div>
+          </div>
+
+          <!-- Curated Tools metrics -->
+          <div class="panel-hud" style="flex: 1;">
+            <div class="panel-hud-header">
+              <div class="panel-hud-title"><span>⚙</span> Curated Tools & Workflows</div>
+            </div>
+            <div class="panel-hud-body" style="padding: var(--space-sm);">
+              <div class="workflow-metric-row">
+                <span>App Mapping:</span>
+                <span class="workflow-val-accent">41 mapped</span>
+              </div>
+              <div class="workflow-metric-row">
+                <span>Intervals:</span>
+                <span class="workflow-val-accent">2 active</span>
+              </div>
+              <div class="workflow-metric-row" style="border: none;">
+                <span>Active Ledger:</span>
+                <span style="color: #00ff88; font-weight: bold;">Hashed OK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ AGENT DASHBOARD PAGE ═══ -->
+      <div class="page-view" id="page-agent-dashboard">
+        <div class="full-page-grid">
+
+          <!-- HEAD AGENT CARD -->
+          <div class="agent-full-card head-card">
+            <div class="agent-full-header">
+              <div class="agent-full-icon">🧠</div>
+              <div>
+                <div class="agent-full-name">Head Agent <span class="agent-badge-general">GENERAL</span></div>
+                <div class="agent-full-role">Always-on Command Brain · Orchestrates all employees</div>
+              </div>
+              <div class="agent-live-dot" id="head-live-dot"></div>
+            </div>
+            <div class="agent-full-stats">
+              <div class="agent-stat-block"><div class="agent-stat-val" id="head-queries">0</div><div class="agent-stat-label">Queries</div></div>
+              <div class="agent-stat-block"><div class="agent-stat-val" id="head-dispatches">0</div><div class="agent-stat-label">Dispatches</div></div>
+              <div class="agent-stat-block"><div class="agent-stat-val" id="head-status-text">IDLE</div><div class="agent-stat-label">Status</div></div>
+            </div>
+            <div class="agent-full-desc">Listens continuously. Routes commands instantly. Speaks back before employees finish. Dispatches specialists as background tasks.</div>
+          </div>
+
+          <!-- EMPLOYEE AGENTS GRID -->
+          <div class="employee-agents-section">
+            <div class="section-label">⚙ EMPLOYEE AGENTS — SPECIALISTS ON STANDBY</div>
+            <div class="employee-grid">
+              <div class="emp-card" id="emp-file">
+                <div class="emp-icon">📁</div>
+                <div class="emp-name">File Agent</div>
+                <div class="emp-role">Filesystem</div>
+                <div class="emp-status idle" id="emp-status-file">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-system">
+                <div class="emp-icon">⚙️</div>
+                <div class="emp-name">System Agent</div>
+                <div class="emp-role">OS Control</div>
+                <div class="emp-status idle" id="emp-status-system">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-desktop">
+                <div class="emp-icon">🖥️</div>
+                <div class="emp-name">Desktop Agent</div>
+                <div class="emp-role">App Windows</div>
+                <div class="emp-status idle" id="emp-status-desktop">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-browser">
+                <div class="emp-icon">🌐</div>
+                <div class="emp-name">Browser Agent</div>
+                <div class="emp-role">Web Automation</div>
+                <div class="emp-status idle" id="emp-status-browser">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-vision">
+                <div class="emp-icon">👁️</div>
+                <div class="emp-name">Vision Agent</div>
+                <div class="emp-role">Screen & Camera</div>
+                <div class="emp-status idle" id="emp-status-vision">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-research">
+                <div class="emp-icon">🔬</div>
+                <div class="emp-name">Research Agent</div>
+                <div class="emp-role">Data & APIs</div>
+                <div class="emp-status idle" id="emp-status-research">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-voice">
+                <div class="emp-icon">🔊</div>
+                <div class="emp-name">Voice Agent</div>
+                <div class="emp-role">TTS Synthesis</div>
+                <div class="emp-status idle" id="emp-status-voice">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-backend">
+                <div class="emp-icon">🗄️</div>
+                <div class="emp-name">Backend Agent</div>
+                <div class="emp-role">Data Pipeline</div>
+                <div class="emp-status idle" id="emp-status-backend">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-security">
+                <div class="emp-icon">🛡️</div>
+                <div class="emp-name">Security Agent</div>
+                <div class="emp-role">Biometrics Gate</div>
+                <div class="emp-status idle" id="emp-status-security">IDLE</div>
+              </div>
+              <div class="emp-card" id="emp-windows">
+                <div class="emp-icon">🪟</div>
+                <div class="emp-name">Windows Agent</div>
+                <div class="emp-role">Win32 / OS</div>
+                <div class="emp-status idle" id="emp-status-windows">IDLE</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIVE TASK LOG -->
+          <div class="task-log-panel">
+            <div class="section-label">📋 LIVE DISPATCH LOG</div>
+            <div class="task-log-feed" id="task-log-feed">
+              <div class="task-log-row muted">Waiting for commands...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══ MEMORY CENTER PAGE ═══ -->
+      <div class="page-view" id="page-memory-center">
+        <div class="memory-page-layout">
+
+          <div class="memory-search-bar">
+            <input type="text" id="memory-search-input" placeholder="🔍  Search semantic memory..." class="memory-search-field">
+            <button id="memory-search-btn" class="memory-search-submit">Search</button>
+          </div>
+
+          <div class="memory-stats-row">
+            <div class="mem-stat-card"><div class="mem-stat-num" id="mem-total-docs">—</div><div class="mem-stat-label">Total Memories</div></div>
+            <div class="mem-stat-card"><div class="mem-stat-num" id="mem-user-msgs">—</div><div class="mem-stat-label">User Messages</div></div>
+            <div class="mem-stat-card"><div class="mem-stat-num" id="mem-ai-msgs">—</div><div class="mem-stat-label">AI Responses</div></div>
+            <div class="mem-stat-card"><div class="mem-stat-num">TF-IDF</div><div class="mem-stat-label">Search Engine</div></div>
+          </div>
+
+          <div class="memory-results-panel" id="memory-results-panel">
+            <div class="memory-result-placeholder">Enter a search query above to retrieve relevant memories from the semantic store.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══ SYSTEM MONITOR PAGE ═══ -->
+      <div class="page-view" id="page-system-monitor">
+        <div class="sysmon-layout">
+
+          <!-- Live vitals row -->
+          <div class="sysmon-vitals-row">
+            <div class="sysmon-vital-card">
+              <div class="sysmon-vital-label">CPU</div>
+              <div class="sysmon-bar-wrap"><div class="sysmon-bar" id="smon-bar-cpu" style="background:#00c2ff;"></div></div>
+              <div class="sysmon-vital-val" id="smon-val-cpu">—</div>
+            </div>
+            <div class="sysmon-vital-card">
+              <div class="sysmon-vital-label">RAM</div>
+              <div class="sysmon-bar-wrap"><div class="sysmon-bar" id="smon-bar-ram" style="background:#00ff88;"></div></div>
+              <div class="sysmon-vital-val" id="smon-val-ram">—</div>
+            </div>
+            <div class="sysmon-vital-card">
+              <div class="sysmon-vital-label">DISK</div>
+              <div class="sysmon-bar-wrap"><div class="sysmon-bar" id="smon-bar-disk" style="background:#ffb800;"></div></div>
+              <div class="sysmon-vital-val" id="smon-val-disk">—</div>
+            </div>
+            <div class="sysmon-vital-card">
+              <div class="sysmon-vital-label">BATTERY</div>
+              <div class="sysmon-bar-wrap"><div class="sysmon-bar" id="smon-bar-batt" style="background:#00ff88;"></div></div>
+              <div class="sysmon-vital-val" id="smon-val-batt">—</div>
+            </div>
+            <div class="sysmon-vital-card">
+              <div class="sysmon-vital-label">NET ↓</div>
+              <div class="sysmon-bar-wrap"><div class="sysmon-bar" id="smon-bar-net" style="background:#a855f7; width:30%;"></div></div>
+              <div class="sysmon-vital-val" id="smon-val-net">—</div>
+            </div>
+          </div>
+
+          <!-- Process Table -->
+          <div class="sysmon-procs-panel">
+            <div class="sysmon-procs-header">
+              <span>⚡ TOP PROCESSES</span>
+              <button id="btn-refresh-procs" class="sysmon-refresh-btn">↻ Refresh</button>
+            </div>
+            <div class="sysmon-procs-table-wrap">
+              <table class="sysmon-table" id="smon-process-table">
+                <thead><tr><th>PID</th><th>Process</th><th>CPU%</th><th>RAM%</th><th>Action</th></tr></thead>
+                <tbody id="smon-proc-tbody"><tr><td colspan="5" class="smon-loading">Loading processes...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Network info -->
+          <div class="sysmon-net-row">
+            <div class="sysmon-net-card"><span class="smon-net-label">Download</span><span class="smon-net-val" id="smon-net-down">— MB/s</span></div>
+            <div class="sysmon-net-card"><span class="smon-net-label">Upload</span><span class="smon-net-val" id="smon-net-up">— MB/s</span></div>
+            <div class="sysmon-net-card"><span class="smon-net-label">Ollama</span><span class="smon-net-val" id="smon-ollama-status">checking...</span></div>
+            <div class="sysmon-net-card"><span class="smon-net-label">Agents Online</span><span class="smon-net-val">11</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══ SECURITY CENTER PAGE ═══ -->
+      <div class="page-view" id="page-security-center">
+        <div class="security-layout">
+
+          <div class="sec-biometric-card">
+            <div class="sec-bio-icon">🛡️</div>
+            <div class="sec-bio-title">Biometric Shield</div>
+            <div class="sec-bio-status" id="sec-bio-status">WIN_HELLO: ACTIVE</div>
+            <button id="sec-bio-challenge-btn" class="sec-challenge-btn">🔐 Trigger Challenge</button>
+          </div>
+
+          <div class="sec-audit-panel">
+            <div class="sec-panel-title">📋 Audit Ledger — Recent Actions</div>
+            <div class="sec-audit-feed" id="sec-audit-feed">
+              <div class="sec-audit-row"><span class="sec-audit-time">--:--:--</span><span class="sec-audit-action">SYSTEM_BOOT</span><span class="sec-audit-tag ok">VALID</span></div>
+              <div class="sec-audit-row"><span class="sec-audit-time">--:--:--</span><span class="sec-audit-action">WS_HANDSHAKE</span><span class="sec-audit-tag ok">VALID</span></div>
+              <div class="sec-audit-row"><span class="sec-audit-time">--:--:--</span><span class="sec-audit-action">STT_INIT</span><span class="sec-audit-tag ok">VALID</span></div>
+            </div>
+          </div>
+
+          <div class="sec-keys-panel">
+            <div class="sec-panel-title">🔑 API Key Status</div>
+            <div class="sec-key-row"><span class="sec-key-name">Gemini API</span><span class="sec-key-status" id="sec-key-gemini">checking...</span></div>
+            <div class="sec-key-row"><span class="sec-key-name">Anthropic / Claude</span><span class="sec-key-status" id="sec-key-claude">checking...</span></div>
+            <div class="sec-key-row"><span class="sec-key-name">Ollama (Local)</span><span class="sec-key-status" id="sec-key-ollama">checking...</span></div>
+            <div class="sec-key-row"><span class="sec-key-name">OpenClaw Gateway</span><span class="sec-key-status" id="sec-key-openclaw">checking...</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══ SETTINGS PAGE ═══ -->
+      <div class="page-view" id="page-settings">
+        <div class="settings-layout">
+
+          <div class="settings-section">
+            <div class="settings-section-title">🤖 LLM Model</div>
+            <div class="settings-row">
+              <label class="settings-label">Active Provider</label>
+              <select class="settings-select" id="set-provider">
+                <option value="auto">Auto (Cascade)</option>
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="gemini">Gemini (Google)</option>
+                <option value="ollama">Ollama (Local)</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Ollama Model</label>
+              <select class="settings-select" id="set-ollama-model">
+                <option>Loading models...</option>
+              </select>
+            </div>
+            <button class="settings-apply-btn" id="set-apply-model">Apply Model Settings</button>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">🎙️ Voice Settings</div>
+            <div class="settings-row">
+              <label class="settings-label">TTS Voice</label>
+              <select class="settings-select" id="set-tts-voice">
+                <option value="en-IN-NeerjaNeural">Neerja (Indian English)</option>
+                <option value="en-US-AriaNeural">Aria (US English)</option>
+                <option value="en-GB-SoniaNeural">Sonia (British)</option>
+                <option value="hi-IN-SwaraNeural">Swara (Hindi)</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">STT Model</label>
+              <select class="settings-select" id="set-stt-model">
+                <option value="tiny">Tiny (fastest)</option>
+                <option value="base" selected>Base (balanced)</option>
+                <option value="small">Small (accurate)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">🌐 Connections</div>
+            <div class="settings-row">
+              <label class="settings-label">Ollama URL</label>
+              <input type="text" class="settings-input" id="set-ollama-url" value="http://localhost:11434">
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Dorothy OS Port</label>
+              <input type="text" class="settings-input" id="set-port" value="8000" readonly>
+            </div>
+            <button class="settings-apply-btn" id="set-apply-conn">Test Connections</button>
+            <div class="settings-conn-result" id="set-conn-result"></div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">🎨 Theme</div>
+            <div class="settings-row">
+              <label class="settings-label">Accent Color</label>
+              <div class="settings-color-row">
+                <div class="color-swatch active" style="background:#00c2ff;" data-color="#00c2ff" title="Cyan (default)"></div>
+                <div class="color-swatch" style="background:#a855f7;" data-color="#a855f7" title="Purple"></div>
+                <div class="color-swatch" style="background:#00ff88;" data-color="#00ff88" title="Green"></div>
+                <div class="color-swatch" style="background:#ffb800;" data-color="#ffb800" title="Amber"></div>
+                <div class="color-swatch" style="background:#ff4444;" data-color="#ff4444" title="Red"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       INTERACTIVE BLURRED OVERLAY MODALS
+       ═══════════════════════════════════════════════════════ -->
+  <!-- Task Manager Modal -->
+  <div class="hud-modal-overlay" id="modal-task-manager">
+    <div class="hud-modal">
+      <div class="hud-modal-header">
+        <div class="hud-modal-title"><span>⚙</span> Dorothy OS — Resource Task Manager</div>
+        <button class="hud-modal-close" id="btn-close-taskmgr">✕</button>
+      </div>
+      <div class="hud-modal-body">
+        <div style="margin-bottom: var(--space-md); font-family: var(--font-mono); font-size: var(--font-size-3xs); color: var(--text-muted);">
+          System Kernel resource management grid. Terminating critical operating processes may result in terminal context loss.
+        </div>
+        <table class="process-table">
+          <thead>
+            <tr>
+              <th>PID</th>
+              <th>Process Name</th>
+              <th>CPU %</th>
+              <th>Memory (MB)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="process-list-table-body">
+            <!-- Populated dynamically via WebSocket -->
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted); padding: var(--space-md);">Querying active process tree...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Direct Agent Dispatch Modal -->
+  <div class="hud-modal-overlay" id="modal-agent-dispatch">
+    <div class="hud-modal" style="width: 480px;">
+      <div class="hud-modal-header">
+        <div class="hud-modal-title"><span>🤖</span> Direct Agent Pipeline Dispatch</div>
+        <button class="hud-modal-close" id="btn-close-dispatch">✕</button>
+      </div>
+      <div class="hud-modal-body">
+        <div class="agent-dispatch-form">
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);">
+            Target Node: <span id="dispatch-target-badge" style="color: var(--color-accent-cyan); font-weight: bold;">UNKNOWN</span>
+          </div>
+          <div style="font-family: var(--font-mono); font-size: var(--font-size-3xs); color: var(--text-muted); margin-bottom: var(--space-xs);">
+            Input prompt direct route bypasses lead agent planner constraints.
+          </div>
+          <textarea class="dispatch-textarea" id="dispatch-prompt-input" placeholder="Enter instructions for target agent node..."></textarea>
+          <button class="btn-dispatch-submit" id="btn-dispatch-send">Dispatch Node Pipeline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+
+       SCRIPTS (ES Modules)
+       ═══════════════════════════════════════════════════════ -->
+  <script type="module" src="/ui/js/app.js"></script>
+  <script type="module" src="/ui/js/chat.js"></script>
+  <script type="module" src="/ui/js/agents.js"></script>
+  <script type="module" src="/ui/js/monitor.js"></script>
+  <script type="module" src="/ui/js/cognitive.js"></script>
+  <script type="module" src="/ui/js/voice.js"></script>
+  <script type="module" src="/ui/js/pages.js"></script>
+
+</body>
+</html>
