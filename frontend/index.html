@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS - Tactical AI HUD Terminal</title>
+  <!-- Google Fonts for Sci-Fi typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/jarvis.css">
+  <link rel="stylesheet" href="css/hud.css">
+  <link rel="stylesheet" href="css/panels.css">
+</head>
+<body>
+  <!-- Scan lines overlay for holographic effect -->
+  <div class="scanlines"></div>
+
+  <!-- Background Interactive Particles Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Cinematic Boot Sequence Overlay -->
+  <div id="boot-overlay">
+    <div class="boot-loader">
+      <div class="boot-logo">J.A.R.V.I.S.</div>
+      <div class="boot-bar-container">
+        <div id="boot-bar" class="boot-bar"></div>
+      </div>
+      <div class="boot-status">
+        <span id="boot-status-label">Initializing Mainframe...</span>
+        <span id="boot-percent">0%</span>
+      </div>
+      <div id="boot-console" class="boot-console">
+        <!-- Dynamic terminal logs -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid App Container (Exactly matches cyan reference blueprint) -->
+  <div id="app-container">
+    
+    <!-- TOP HEADER BAR -->
+    <header class="hud-header">
+      <div class="hud-header-left">
+        <div class="hud-logo-container">
+          <div class="hud-logo-icon"></div>
+          <span class="hud-title">J.A.R.V.I.S.</span>
+        </div>
+        <div class="hud-status-dot-container">
+          <div id="system-status-dot" class="status-dot disconnected"></div>
+          <span id="system-status-text" class="status-text">STANDBY</span>
+        </div>
+      </div>
+      
+      <div class="hud-header-center-bars">
+        <div class="header-segment-bar"></div>
+        <div class="header-segment-bar active"></div>
+        <div class="header-segment-bar"></div>
+      </div>
+      
+      <div class="hud-header-right">
+        <div class="header-data-item">
+          <span class="header-data-label">LLM ENGINE</span>
+          <span id="header-model-info" class="header-data-val">QWEN3:8B</span>
+        </div>
+        <div class="header-data-item">
+          <span class="header-data-label">CORE SYSTEM</span>
+          <span class="header-data-val">ONLINE</span>
+        </div>
+        <div class="header-data-item">
+          <span class="header-data-label">MARK VERSION</span>
+          <span class="header-data-val">85.0.4</span>
+        </div>
+        <div class="header-data-item">
+          <span class="header-data-label">LOCAL TIMESTAMP</span>
+          <span id="hud-clock" class="header-data-val">00:00:00 UTC</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- LEFT COLUMN -->
+    <aside class="left-column">
+      <!-- Tall Tactical Menu List Panel -->
+      <section class="hud-panel left-top-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">TACTICAL COMMAND DECK</h2>
+        <div class="tactical-menu-list">
+          <div class="menu-item active" onclick="selectMenu('geoint')">
+            <span>GEOINTELLIGENCE NET</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+          <div class="menu-item" onclick="selectMenu('sysinfo')">
+            <span>SYSTEM TELEMETRY</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+          <div class="menu-item" onclick="selectMenu('commands')">
+            <span>TERMINAL CONTROLLER</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+          <div class="menu-item" onclick="selectMenu('agents')">
+            <span>ORCHESTRATOR MATRIX</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+          <div class="menu-item" onclick="selectMenu('settings')">
+            <span>LAPTOP CORE INTERFACE</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+          <div class="menu-item" onclick="selectMenu('audio')">
+            <span>AUDIO FREQUENCY</span>
+            <span class="menu-arrow">❯</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Form Options Panel -->
+      <section class="hud-panel left-bottom-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">INTERFACE CONFIG</h2>
+        <div class="panel-options-list">
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-sound" checked>
+            <label for="chk-sound">SYSTEM VOCALIZED AUDIO</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-particles" checked>
+            <label for="chk-particles">BACKGROUND PARTICLE STREAM</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-scanlines" checked>
+            <label for="chk-scanlines">HOLOGRAPHIC SCANLINES</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-direct-speech">
+            <label for="chk-direct-speech">DIRECT SPEECH (HANDS-FREE)</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="chk-wake-word">
+            <label for="chk-wake-word">WAKE WORD MATCH ("JARVIS")</label>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- MIDDLE COLUMN -->
+    <main class="middle-column">
+      <!-- 3D Earth Globe Panel -->
+      <section class="hud-panel middle-top-panel hud-brackets" id="globe-panel-container">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">3D GEOGRAPHICAL INTERACTIVE GLOBE</h2>
+        <div class="globe-subtitle">SELECT GEO-NODE TO EXTRACT INTEL DOSSIER</div>
+        <div id="globe-3d-container" class="globe-container">
+          <canvas id="globe-3d-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Empty Tactical Logs / Chat / Dossier Panel -->
+      <section class="hud-panel middle-center-panel hud-brackets" id="dossier-panel">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title" id="center-panel-title">TACTICAL SYSTEM CONSOLE</h2>
+        
+        <!-- Cognitive Reasoning Live Thought Stream -->
+        <div id="cognitive-reasoning-container" class="cognitive-reasoning-panel">
+          <div class="cog-header">🧠 COGNITIVE REASONING PROTOCOLS [ACTIVE UPLINK]</div>
+          <div id="cognitive-console" class="cognitive-console-body">
+            <div>&gt; Awaiting command intent parameters...</div>
+          </div>
+        </div>
+        
+        <!-- Live Chat Messages Output Area -->
+        <div id="chat-messages" class="chat-messages-container">
+          <div class="message jarvis">
+            <div class="message-text">ALL SYSTEMS FUNCTIONAL, SIR. CLICK Pinpoints ON THE 3D EARTH GLOBE TO COMPILE GEOGRAPHIC DATA CARDS, OR ENTER A CORE COMMAND TO GET STARTED.</div>
+          </div>
+        </div>
+
+        <!-- Chat Typing Indicator -->
+        <div id="chat-typing" class="typing-indicator">
+          <span>JARVIS is calculating</span>
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-row">
+          <div class="chat-input-wrapper">
+            <input type="text" id="chat-user-input" class="chat-input" placeholder="TRANSMIT CORE VOICE AND TEXT DATA SYSTEM..." autocomplete="off">
+            <button id="chat-mic-btn" class="chat-mic-btn" title="Voice Input Mode">🎙️</button>
+          </div>
+          <button id="chat-send-btn" class="chat-send-btn">TRANSMIT</button>
+        </div>
+      </section>
+
+      <!-- Bottom Laptop Settings Control Deck -->
+      <section class="hud-panel middle-bottom-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">LAPTOP CORE DESKTOP MANAGER</h2>
+        <div class="laptop-control-deck">
+          
+          <!-- Master Sliders -->
+          <div class="sliders-section">
+            <div class="slider-wrapper">
+              <span class="slider-label">VOL</span>
+              <input type="range" id="slider-volume" min="0" max="100" value="50" class="hud-slider">
+              <span id="volume-val" class="slider-value">50%</span>
+            </div>
+            <div class="slider-wrapper">
+              <span class="slider-label">BRIGHT</span>
+              <input type="range" id="slider-brightness" min="0" max="100" value="74" class="hud-slider">
+              <span id="brightness-val" class="slider-value">74%</span>
+            </div>
+          </div>
+
+          <!-- Vertical Switches grid -->
+          <div class="switches-section">
+            <div class="switch-grid-item">
+              <span class="switch-name">WIFI</span>
+              <input type="checkbox" id="toggle-wifi" class="hud-switch-toggle" checked>
+              <label for="toggle-wifi" class="hud-switch-label"></label>
+            </div>
+            <div class="switch-grid-item">
+              <span class="switch-name">MUTE</span>
+              <input type="checkbox" id="toggle-mute" class="hud-switch-toggle">
+              <label for="toggle-mute" class="hud-switch-label"></label>
+            </div>
+          </div>
+
+          <!-- Multimedia Keypad -->
+          <div class="media-keypad">
+            <button id="media-prev" class="media-btn" title="Previous Track">⏮</button>
+            <button id="media-play" class="media-btn active" title="Play/Pause">⏯</button>
+            <button id="media-next" class="media-btn" title="Next Track">⏭</button>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- RIGHT COLUMN -->
+    <aside class="right-column">
+      <!-- Circular Telemetry Dials Panel -->
+      <section class="hud-panel right-top-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">RESOURCES LEVEL</h2>
+        <div class="system-gauges-container">
+          <div class="gauge-wrapper">
+            <canvas id="cpu-gauge" class="gauge-canvas" width="120" height="120"></canvas>
+            <span class="gauge-label">CPU</span>
+          </div>
+          <div class="gauge-wrapper">
+            <canvas id="ram-gauge" class="gauge-canvas" width="120" height="120"></canvas>
+            <span class="gauge-label">RAM</span>
+          </div>
+          <div class="gauge-wrapper">
+            <canvas id="disk-gauge" class="gauge-canvas" width="120" height="120"></canvas>
+            <span class="gauge-label">DISK</span>
+          </div>
+        </div>
+        <!-- Network Metrics -->
+        <div class="network-status">
+          <div class="net-row">
+            <span>UPLINK (TX)</span>
+            <span id="net-upload-val" class="share-mono">0.0 KB/S</span>
+          </div>
+          <div class="net-row">
+            <span>DOWNLINK (RX)</span>
+            <span id="net-download-val" class="share-mono">0.0 KB/S</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Signal Bars Visualizer Panel -->
+      <section class="hud-panel right-middle-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">TELEMETRY SPECTRAL ANALYSIS</h2>
+        <div class="signal-visualizer-container">
+          <canvas id="signal-canvas" class="signal-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Heartbeat Oscilloscope Panel -->
+      <section class="hud-panel right-bottom-panel hud-brackets">
+        <div class="hud-brackets-corners"></div>
+        <h2 class="panel-title">CORE HEALTH OSCILLOSCOPE</h2>
+        <div class="oscilloscope-container">
+          <canvas id="oscilloscope-canvas" class="oscilloscope-canvas"></canvas>
+        </div>
+        <!-- Power readings -->
+        <div class="power-readout">
+          <div class="power-row">
+            <span>BATTERY PERCENT</span>
+            <span id="battery-percent-val" class="share-mono">--%</span>
+          </div>
+          <div class="power-row">
+            <span>CHARGING STATE</span>
+            <span id="battery-charging-val" class="share-mono">AC POWER</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- VERY BOTTOM: SOUND WAVE CAPSULE ( реакция на голос) -->
+    <footer class="hud-waveform-panel">
+      <canvas id="waveform-canvas" class="waveform-canvas"></canvas>
+    </footer>
+
+  </div>
+
+  <!-- Three.js CDN Library for 3D Earth Globe -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Local Tactical HUD Scripts -->
+  <script src="js/particles.js"></script>
+  <script src="js/arc-reactor.js"></script> <!-- We keep ArcReactor inside background apps -->
+  <script src="js/neural-network.js"></script> <!-- Sub-synapses are updated by app -->
+  <script src="js/system-monitor.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/agent-dashboard.js"></script>
+  <script src="js/audio-viz.js"></script>
+  <script src="js/websocket.js"></script>
+  <script src="js/globe.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* --- CORE DESIGN SYSTEM --- */
+:root {
+  /* Colors */
+  --hud-bg: #050816;
+  --hud-bg-secondary: #0a0e27;
+  --hud-cyan: #00FFFF;
+  --hud-cyan-bright: #33C3F7;
+  --hud-cyan-soft: #67C7EB;
+  --hud-cyan-deep: #00D4FF;
+  --hud-teal: #0ABDC6;
+  --hud-orange: #ff6b35;
+  --hud-amber: #ffaa00;
+  --hud-gold: #FBCA03;
+  --hud-red: #FF3344;
+  --hud-green: #00ff88;
+  --hud-white: #E0F7FA;
+  
+  /* Text and Borders */
+  --hud-text: rgba(0, 255, 255, 0.9);
+  --hud-text-dim: rgba(0, 255, 255, 0.5);
+  --hud-border: rgba(0, 255, 255, 0.2);
+  --hud-panel-bg: rgba(5, 8, 22, 0.65);
+  --hud-panel-glow: 0 0 15px rgba(0, 255, 255, 0.15);
+  --hud-glow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.2);
+  --hud-glow-orange: 0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.2);
+  
+  /* Fonts */
+  --font-header: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  
+  /* Transitions */
+  --transition-speed: 0.3s;
+  --transition-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Reset and Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--hud-bg);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(10, 14, 39, 0.8) 0%, rgba(5, 8, 22, 1) 100%),
+    radial-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 100% 100%, 30px 30px;
+  color: var(--hud-text);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+/* Background Particle Canvas Layer */
+#particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Scanline Overlay Effect */
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.scanlines::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 255, 255, 0) 0%,
+    rgba(0, 255, 255, 0.08) 10%,
+    rgba(0, 255, 255, 0) 20%
+  );
+  animation: scanline-roll 12s linear infinite;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 255, 255, 0.02);
+  border-left: 1px solid rgba(0, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.2);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.4);
+}
+
+/* Glassmorphism Panel Core Styles */
+.hud-panel {
+  position: relative;
+  background: var(--hud-panel-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--hud-border);
+  box-shadow: var(--hud-panel-glow);
+  padding: 15px;
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  overflow: hidden;
+}
+
+.hud-panel:hover {
+  border-color: rgba(0, 255, 255, 0.35);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.08), inset 0 0 10px rgba(0, 255, 255, 0.02);
+}
+
+/* Corner Bracket Decorations */
+.hud-brackets::before, .hud-brackets::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: var(--hud-cyan);
+  border-style: solid;
+  transition: all var(--transition-speed) var(--transition-ease);
+}
+
+/* Top-Left & Bottom-Right Brackets default */
+.hud-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px; /* Top and Left */
+}
+
+.hud-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0; /* Bottom and Right */
+}
+
+/* Double Brackets Support (Four corners) */
+.hud-brackets-all::before, .hud-brackets-all::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: var(--hud-cyan);
+  border-style: solid;
+}
+.hud-brackets-all::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.hud-brackets-all::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* We can add secondary elements inside for top-right/bottom-left brackets */
+.hud-brackets-corners {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hud-brackets-corners::before, .hud-brackets-corners::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--hud-cyan);
+  border-style: solid;
+}
+.hud-brackets-corners::before {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0; /* Top and Right */
+}
+.hud-brackets-corners::after {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px; /* Bottom and Left */
+}
+
+/* Glowing Elements */
+.glow-text {
+  text-shadow: var(--hud-glow);
+}
+.glow-text-orange {
+  text-shadow: var(--hud-glow-orange);
+  color: var(--hud-orange) !important;
+}
+.border-glow {
+  box-shadow: var(--hud-glow);
+}
+
+/* Keyframe Animations */
+@keyframes scanline-roll {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 30px rgba(0, 255, 255, 0.2);
+  }
+}
+
+@keyframes pulse-glow-orange {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.2);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.6), 0 0 30px rgba(255, 107, 53, 0.2);
+  }
+}
+
+@keyframes flicker {
+  0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+    opacity: 0.99;
+    filter: none;
+  }
+  20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+    opacity: 0.4;
+    filter: blur(1px);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rotate-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotate-counter-clockwise {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0.3deg);
+  }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: skew(-0.5deg);
+  }
+  40% {
+    clip-path: inset(25% 0 58% 0);
+    transform: skew(0.8deg);
+  }
+  60% {
+    clip-path: inset(80% 0 5% 0);
+    transform: skew(-0.2deg);
+  }
+  80% {
+    clip-path: inset(11% 0 80% 0);
+    transform: skew(0.5deg);
+  }
+  100% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0deg);
+  }
+}
+
+/* Boot Sequence Overlay CSS */
+#boot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--hud-bg);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-mono);
+  color: var(--hud-cyan);
+}
+
+.boot-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 450px;
+}
+
+.boot-logo {
+  font-family: var(--font-header);
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  margin-bottom: 20px;
+  text-shadow: var(--hud-glow);
+  text-transform: uppercase;
+  animation: flicker 4s infinite;
+}
+
+.boot-bar-container {
+  width: 100%;
+  height: 6px;
+  border: 1px solid var(--hud-border);
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  margin-bottom: 15px;
+}
+
+.boot-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--hud-cyan);
+  box-shadow: var(--hud-glow);
+  transition: width 0.1s ease-out;
+}
+
+.boot-status {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--hud-text-dim);
+  text-transform: uppercase;
+}
+
+.boot-console {
+  width: 100%;
+  height: 120px;
+  margin-top: 15px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.05);
+  padding: 10px;
+  font-size: 0.75rem;
+  color: var(--hud-cyan-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

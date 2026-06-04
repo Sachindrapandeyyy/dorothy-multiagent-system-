@@ -1,0 +1,398 @@
+[
+  {
+    "timestamp": "2026-06-02T06:15:24.837497",
+    "query": "hello",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:15:42.595376",
+    "query": "Can you open YouTube com?",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.0,
+      "web": 0.2408,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:16:11.813406",
+    "query": "No, I want you to open it. Open YouTube.",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.0,
+      "web": 0.2408,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:16:48.583778",
+    "query": "What's the current time?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:45:50.567448",
+    "query": "hi",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:46:12.305944",
+    "query": "kya haal chal",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:47:06.248593",
+    "query": "mera naam sachin hai",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:47:41.253074",
+    "query": "What is my name?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:47:56.756237",
+    "query": "My full name is Satyendra Shekhar Pandey.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:48:23.454006",
+    "query": "Can you perform Google search say yes or no?",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.1131,
+      "web": 0.3067,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:48:59.199834",
+    "query": "Hello.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:49:28.847516",
+    "query": "search on google for youtube.com",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.1131,
+      "web": 0.3067,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:49:34.450634",
+    "query": "Nahi JA rahi hai meri avaz.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:50:12.077228",
+    "query": "Am I connected to charger?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:50:33.331409",
+    "query": "How can I upgrade you?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:50:59.497930",
+    "query": "Count from one to 10.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:51:38.132532",
+    "query": "count 1 to 50",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:53:00.314103",
+    "query": "Father name is Shashank Shekhar Pandey.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:53:39.578113",
+    "query": "Tell me my name.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:53:50.140817",
+    "query": "Tell me my full name.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:54:05.541995",
+    "query": "Tell my father's full name.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:55:27.683150",
+    "query": "sachindra shekhar pandey phone number : 7905604539         sachindra fathers phone number : 9478437479",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:55:56.045584",
+    "query": "Tell me the phone number of Sajendra Shekhar Pandey.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:57:26.292863",
+    "query": "do you know this pledge : india is my country and all indians are my brother and sisters",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.0,
+      "web": 0.2408,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:58:04.180086",
+    "query": "Recite me the whole pledge.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:59:15.689789",
+    "query": "A new tab.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T06:59:38.534754",
+    "query": "google.com",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:00:34.787680",
+    "query": "i wanna know about the system battery health",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.3693,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:01:51.811581",
+    "query": "Jarvis, do you have a memory?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.2132,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:02:25.296582",
+    "query": "open whatsapp",
+    "allocated_agent": "web",
+    "cosine_scores": {
+      "system": 0.0,
+      "file": 0.0,
+      "web": 0.2408,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:02:49.478488",
+    "query": "whatsapp desktop",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:04:14.914076",
+    "query": "Do you have?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:04:52.299359",
+    "query": "can you perform object detection ?",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:25:55.309737",
+    "query": "Kai Hone per.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:26:01.956931",
+    "query": "Haan, Madam.",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  },
+  {
+    "timestamp": "2026-06-02T07:26:20.530164",
+    "query": "nothing baby",
+    "allocated_agent": "system",
+    "cosine_scores": {
+      "system": 0.5,
+      "file": 0.0,
+      "web": 0.0,
+      "code": 0.0
+    }
+  }
+]

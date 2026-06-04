@@ -1,0 +1,11 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+websockets>=15.0
+ollama>=0.4.0
+psutil>=7.0.0
+pyttsx3>=2.98
+edge-tts>=6.1.0
+Pillow>=11.0.0
+requests>=2.32.0
+pydantic>=2.0.0
+aiofiles>=24.0.0
